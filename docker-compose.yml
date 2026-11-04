@@ -1,0 +1,17 @@
+# Ebook Prep. Start and stop it with ebook-prep.sh (or the prepon / prepoff aliases),
+# which fills in your user ID and folders.
+services:
+  ebook-prep:
+    build: .
+    image: ebook-prep
+    container_name: ebook-prep
+    user: "${UID_GID:-1000:100}"          # files it writes belong to you, not root
+    environment:
+      BOOKS_HOST: "${BOOKS_HOST:-~/audiobooks/books}"   # only used to show the paths in the UI
+      TEXT_HOST: "${TEXT_HOST:-~/audiobooks/text}"
+    ports:
+      - "127.0.0.1:7880:7880"             # change to "7880:7880" to open it from other computers
+    volumes:
+      - "${BOOKS_DIR:-~/audiobooks/books}:/data/books"
+      - "${TEXT_DIR:-~/audiobooks/text}:/data/text"
+    restart: unless-stopped

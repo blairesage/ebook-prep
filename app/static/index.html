@@ -1,0 +1,1106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ebook Prep</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #EDF0EE; --side: #E3E8E5; --sheet: #FFFFFF; --ink: #1D2523; --muted: #5A6561;
+  --rule: #CDD5D1; --pencil: #2B64AD; --wash: #DDE8F6; --ok: #2C7650; --bad: #B42318;
+  --find: #FFE38A; --edit: #F1F6FC; --shadow: 0 1px 2px rgba(29, 37, 35, .08), 0 8px 24px rgba(29, 37, 35, .06);
+  --sans: "Instrument Sans", system-ui, sans-serif;
+  --serif: "Literata", Georgia, "Times New Roman", serif;
+  --mono: ui-monospace, "JetBrains Mono", monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #121716; --side: #171D1C; --sheet: #1C2321; --ink: #E2E7E4; --muted: #96A19C;
+    --rule: #2C3633; --pencil: #8DBAF2; --wash: #1B2D44; --ok: #6CC596; --bad: #F28B82;
+    --find: #6A5413; --edit: #1F2A2C; --shadow: none; color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body {
+  background: var(--bg); color: var(--ink); font: 15px/1.45 var(--sans);
+  display: grid; grid-template-columns: 300px minmax(0, 1fr); height: 100vh; overflow: hidden;
+}
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--pencil); outline-offset: 2px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+/* ---------- sidebar */
+.side { background: var(--side); border-right: 1px solid var(--rule); overflow-y: auto; padding: 22px 18px 28px; }
+.brand h1 { font: 600 26px/1.1 var(--serif); margin: 0; letter-spacing: -.01em; }
+.brand p { margin: 6px 0 18px; color: var(--muted); }
+.drop {
+  display: block; width: 100%; text-align: left; border: 1.5px dashed var(--rule); border-radius: 10px;
+  background: transparent; padding: 14px; cursor: pointer; color: var(--muted);
+}
+.drop strong { display: block; color: var(--ink); font-weight: 600; }
+.drop:hover, body.dropping .drop { border-color: var(--pencil); color: var(--ink); background: var(--wash); }
+.group { margin-top: 24px; }
+.group h2 { font: 600 15px/1.2 var(--sans); margin: 0; }
+.group .where { color: var(--muted); font-size: 13px; margin: 2px 0 8px; word-break: break-all; }
+.files { list-style: none; margin: 0; padding: 0; }
+.files button {
+  width: 100%; text-align: left; border: 0; background: transparent; border-radius: 8px;
+  padding: 7px 10px; cursor: pointer; display: grid; grid-template-columns: 1fr auto; gap: 2px 8px;
+}
+.files button:hover { background: rgba(127, 140, 135, .14); }
+.files button[aria-current="true"] { background: var(--sheet); box-shadow: var(--shadow); }
+.files .fname { overflow-wrap: anywhere; }
+.files .meta { color: var(--muted); font-size: 13px; grid-column: 1 / -1; }
+.files .done { color: var(--ok); font-size: 13px; align-self: start; }
+.empty { color: var(--muted); font-size: 14px; margin: 6px 0 0; }
+
+.opts { margin-top: 18px; background: var(--sheet); border-radius: 10px; padding: 14px; box-shadow: var(--shadow); border: 1px solid var(--rule); }
+.opts .for { font-weight: 600; margin: 0 0 10px; overflow-wrap: anywhere; }
+.check { display: flex; gap: 8px; align-items: flex-start; margin: 8px 0; cursor: pointer; }
+.check input { margin-top: 3px; accent-color: var(--pencil); }
+.check small, fieldset small { display: block; color: var(--muted); font-size: 13px; }
+fieldset { border: 0; padding: 0; margin: 12px 0 4px; }
+legend { font-weight: 600; padding: 0; margin-bottom: 2px; }
+
+.btn {
+  border: 1px solid var(--rule); background: var(--sheet); border-radius: 8px; padding: 7px 14px;
+  cursor: pointer; font-weight: 500;
+}
+.btn:hover { border-color: var(--muted); }
+.btn.primary { background: var(--pencil); border-color: var(--pencil); color: #fff; }
+@media (prefers-color-scheme: dark) { .btn.primary { color: #0E1A2A; } }
+.btn.primary:hover { filter: brightness(1.07); }
+.btn:disabled { opacity: .5; cursor: default; }
+.opts .btn.primary { width: 100%; margin-top: 12px; padding: 9px; }
+
+/* ---------- main */
+main { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; min-width: 0; height: 100vh; }
+.top { padding: 18px 28px 12px; border-bottom: 1px solid var(--rule); }
+.title-row { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; }
+.doc-name { font: 600 22px/1.2 var(--serif); margin: 0; overflow-wrap: anywhere; }
+.summary { color: var(--muted); font-size: 14px; margin: 4px 0 0; }
+.tools { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; margin-top: 12px; }
+.tabs { display: inline-flex; border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; }
+.tabs button { border: 0; background: transparent; padding: 6px 14px; cursor: pointer; }
+.tabs button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.find { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.find input[type=text] {
+  width: 170px; border: 1px solid var(--rule); background: var(--sheet); border-radius: 8px; padding: 6px 10px;
+}
+.find .count { color: var(--muted); font-size: 14px; min-width: 70px; }
+.find label { font-size: 14px; display: inline-flex; gap: 5px; align-items: center; cursor: pointer; }
+.find input[type=checkbox] { accent-color: var(--pencil); }
+
+.body { display: grid; grid-template-columns: minmax(0, 1fr) 270px; min-height: 0; }
+.scroller { overflow-y: auto; padding: 28px 28px 60px; min-width: 0; }
+.sheet {
+  max-width: 44rem; margin: 0 auto; background: var(--sheet); border-radius: 4px; box-shadow: var(--shadow);
+  border: 1px solid var(--rule); padding: 56px 64px 72px;
+  font: 18px/1.65 var(--serif); font-optical-sizing: auto; hyphens: none;
+}
+/* One blank line between paragraphs and two at a chapter break, like the file itself,
+   so Proof and Plain text line up. */
+.sheet .para, .sheet h3 { margin: 0 0 1.65em; }
+.sheet .para p { margin: 0; }
+.sheet h3 { font: inherit; font-weight: 600; }
+.sheet .break { display: flex; align-items: center; gap: 14px; height: 1.65em; margin: 0; color: var(--muted); }
+.sheet .break span { font: 13px var(--sans); }
+.sheet .break::before, .sheet .break::after { content: ""; flex: 1; border-top: 1px solid var(--rule); }
+.sheet [data-i] { outline: none; caret-color: var(--pencil); border-radius: 3px; cursor: text; }
+.sheet [data-i]:focus { background: var(--edit); box-shadow: 0 0 0 6px var(--edit); }
+mark.w { background: none; color: inherit; text-decoration: underline wavy var(--pencil); text-decoration-thickness: 1.5px; text-underline-offset: 4px; cursor: pointer; }
+mark.f { background: var(--find); color: inherit; border-radius: 2px; }
+mark.f.at { outline: 2px solid var(--pencil); }
+textarea.editor {
+  display: block; width: 100%; margin: 0 auto; height: 100%; min-height: 60vh;
+  background: var(--sheet); color: var(--ink); border: 1px solid var(--rule); border-radius: 4px;
+  padding: 56px 64px 72px; font: 18px/1.65 var(--serif); resize: none; box-shadow: var(--shadow);
+  max-width: 44rem; caret-color: var(--pencil);
+}
+.scroller.editing { display: flex; padding-bottom: 28px; }
+
+.rail { border-left: 1px solid var(--rule); overflow-y: auto; padding: 20px 18px 40px; }
+.rail h2 { font: 600 15px/1.2 var(--sans); margin: 0 0 4px; }
+.rail .help { color: var(--muted); font-size: 13px; margin: 0 0 10px; }
+.rail section + section { margin-top: 26px; }
+.words, .heads { list-style: none; margin: 0; padding: 0; }
+.words button, .heads button {
+  width: 100%; text-align: left; border: 0; background: transparent; border-radius: 6px; padding: 4px 8px;
+  cursor: pointer; display: flex; justify-content: space-between; gap: 8px;
+}
+.words button { font-family: var(--serif); }
+.words button span:last-child { color: var(--muted); font: 13px var(--sans); }
+.words button:hover, .heads button:hover { background: var(--wash); }
+.heads button { font-family: var(--serif); font-size: 14px; }
+.joins { list-style: none; margin: 0; padding: 0; }
+.joins li { display: flex; align-items: center; gap: 6px; }
+.joins .j-find {
+  flex: 1; text-align: left; border: 0; background: transparent; border-radius: 6px; padding: 4px 8px;
+  cursor: pointer; font-family: var(--serif); min-width: 0; overflow-wrap: anywhere;
+}
+.joins .j-find:hover { background: var(--wash); }
+.joins .to { color: var(--muted); }
+.btn.small { padding: 2px 10px; font-size: 13px; }
+.hint { color: var(--muted); font-size: 13px; margin: 6px 0 0; }
+
+.bar { display: flex; align-items: center; gap: 10px; padding: 10px 28px; border-top: 1px solid var(--rule); background: var(--bg); }
+.bar .status { color: var(--muted); font-size: 14px; margin-right: auto; overflow-wrap: anywhere; }
+.bar .status.unsaved { color: var(--ink); }
+
+/* empty, running, error states */
+.state { max-width: 36rem; margin: 12vh auto 0; padding: 0 28px; }
+.state h2 { font: 600 24px/1.25 var(--serif); margin: 0 0 8px; }
+.state p { color: var(--muted); margin: 0 0 12px; }
+.state.err h2 { color: var(--bad); }
+.log {
+  background: var(--sheet); border: 1px solid var(--rule); border-radius: 8px; padding: 12px 14px;
+  font: 12.5px/1.5 var(--mono); max-height: 50vh; overflow-y: auto; white-space: pre-wrap; color: var(--muted);
+}
+.log div:last-child { color: var(--ink); }
+.toast { position: fixed; right: 28px; bottom: 64px; background: var(--ink); color: var(--bg); padding: 8px 14px; border-radius: 8px; font-size: 14px; opacity: 0; pointer-events: none; transition: opacity .2s; }
+.toast.show { opacity: 1; }
+.toast.bad { background: var(--bad); color: #fff; }
+
+@media (max-width: 1100px) {
+  .body { grid-template-columns: 1fr; grid-template-rows: minmax(0, 1fr) auto; }
+  .rail { border-left: 0; border-top: 1px solid var(--rule); max-height: 30vh; }
+}
+@media (max-width: 760px) {
+  body { grid-template-columns: 1fr; height: auto; overflow: visible; }
+  .side { border-right: 0; border-bottom: 1px solid var(--rule); }
+  main { height: auto; }
+  .top, .bar { padding-left: 16px; padding-right: 16px; }
+  .scroller { padding: 16px; }
+  .sheet, textarea.editor { padding: 28px 22px 40px; font-size: 17px; }
+  .find input[type=text] { width: 140px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
+</style>
+</head>
+<body>
+<aside class="side">
+  <div class="brand">
+    <h1>Ebook Prep</h1>
+    <p>Turn a book file into clean lines for narration.</p>
+  </div>
+  <button class="drop" id="drop" type="button">
+    <strong id="drop-title">Add a book</strong>
+    <span id="drop-sub">Drop an EPUB, PDF or TXT here, or choose a file.</span>
+  </button>
+  <input type="file" id="picker" accept=".epub,.pdf,.txt" multiple hidden>
+
+  <div class="group">
+    <h2>Books</h2>
+    <p class="where" id="books-dir"></p>
+    <ul class="files" id="books"></ul>
+  </div>
+
+  <div class="opts" id="opts" hidden>
+    <p class="for" id="opts-for"></p>
+    <label class="check"><input type="checkbox" id="o-sentences">
+      <span>One sentence per line<small>Default is one paragraph per line.</small></span></label>
+    <label class="check"><input type="checkbox" id="o-furniture">
+      <span>Keep page numbers and headers<small>Only if real text is being removed.</small></span></label>
+    <fieldset id="o-ocr">
+      <legend>Text layer</legend>
+      <label class="check"><input type="radio" name="ocr" value="auto" checked>
+        <span>OCR pages with no text<small>Scanned PDFs get read automatically.</small></span></label>
+      <label class="check"><input type="radio" name="ocr" value="redo">
+        <span>Redo OCR on every page<small>Slower. Use when the existing text is full of errors.</small></span></label>
+      <label class="check"><input type="radio" name="ocr" value="off">
+        <span>Use the existing text only</span></label>
+    </fieldset>
+    <button class="btn primary" id="convert" type="button">Convert</button>
+  </div>
+
+  <div class="group">
+    <h2>Converted text</h2>
+    <p class="where" id="text-dir"></p>
+    <ul class="files" id="texts"></ul>
+  </div>
+</aside>
+
+<main id="main">
+  <div class="state" id="state">
+    <h2>Pick a book to convert</h2>
+    <p>Choose one from the list, or drop a file anywhere in this window. The cleaned text is saved next to your other converted books, ready to load in tts-audiobook-tool.</p>
+  </div>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<template id="doc-tpl">
+  <header class="top">
+    <div class="title-row">
+      <h2 class="doc-name" id="doc-name"></h2>
+    </div>
+    <p class="summary" id="doc-summary"></p>
+    <p class="hint" id="hint">Click the text to edit it. Enter starts a new paragraph; Backspace at the start of a paragraph joins it to the one before. Ctrl+Z undoes.</p>
+    <div class="tools">
+      <div class="tabs" role="group" aria-label="View">
+        <button type="button" data-view="proof" aria-pressed="true">Proof</button>
+        <button type="button" data-view="plain" aria-pressed="false">Plain text</button>
+      </div>
+      <div class="find" role="search">
+        <label class="sr" for="f-q">Find</label>
+        <input type="text" id="f-q" placeholder="Find" autocomplete="off">
+        <label class="sr" for="f-r">Replace with</label>
+        <input type="text" id="f-r" placeholder="Replace with" autocomplete="off">
+        <label><input type="checkbox" id="f-whole" checked> Whole word</label>
+        <label><input type="checkbox" id="f-case"> Match case</label>
+        <span class="count" id="f-count"></span>
+        <button class="btn" type="button" id="f-next">Next</button>
+        <button class="btn" type="button" id="f-all">Replace all</button>
+      </div>
+    </div>
+  </header>
+  <div class="body">
+    <div class="scroller" id="scroller"></div>
+    <aside class="rail">
+      <section id="joins-box" hidden>
+        <h2>Split words</h2>
+        <p class="help">These look like one word broken in two.</p>
+        <ul class="joins" id="joins"></ul>
+      </section>
+      <section>
+        <h2>Words to check</h2>
+        <p class="help" id="words-help">Not in the word list, so likely OCR errors. Capitalized names are skipped. Click one to find it, then fix it in the text or with Replace all.</p>
+        <ul class="words" id="words"></ul>
+      </section>
+      <section>
+        <h2>Headings</h2>
+        <p class="help">Leftover page headers show up here too.</p>
+        <ul class="heads" id="heads"></ul>
+      </section>
+    </aside>
+  </div>
+  <footer class="bar">
+    <span class="status" id="status"></span>
+    <button class="btn" type="button" id="download">Download</button>
+    <button class="btn primary" type="button" id="save">Save</button>
+  </footer>
+</template>
+
+<script>
+const $ = (s, el = document) => el.querySelector(s);
+const esc = s => s.replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
+const state = { files: null, selected: null, doc: null, view: "proof", job: null, poll: null, matchAt: -1 };
+
+async function api(path, opts = {}) {
+  const r = await fetch(path, opts);
+  let data = {};
+  try { data = await r.json(); } catch (_) {}
+  if (!r.ok) throw new Error(data.error || `The server answered ${r.status}.`);
+  return data;
+}
+
+let toastTimer;
+function toast(msg, bad = false) {
+  const t = $("#toast");
+  t.textContent = msg;
+  t.className = "toast show" + (bad ? " bad" : "");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.className = "toast" + (bad ? " bad" : ""), bad ? 6000 : 2500);
+}
+
+const size = n => n > 1e6 ? (n / 1e6).toFixed(1) + " MB" : Math.max(1, Math.round(n / 1e3)) + " KB";
+const when = t => new Date(t * 1000).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+
+// ---------------------------------------------------------------- sidebar
+async function loadFiles() {
+  try { state.files = await api("/api/files"); }
+  catch (e) { toast(e.message, true); return; }
+  renderSide();
+}
+
+function renderSide() {
+  const f = state.files;
+  $("#books-dir").textContent = f.books_dir;
+  $("#text-dir").textContent = f.text_dir;
+  const books = $("#books");
+  books.innerHTML = f.books.length ? "" : `<li class="empty">No books yet. Add one above, or copy files into this folder.</li>`;
+  for (const b of f.books) {
+    const li = document.createElement("li");
+    li.innerHTML = `<button type="button" aria-current="${b.name === state.selected}">
+      <span class="fname">${esc(b.name)}</span>${b.output ? `<span class="done">Converted</span>` : "<span></span>"}
+      <span class="meta">${size(b.size)}, added ${when(b.mtime)}</span></button>`;
+    li.firstElementChild.onclick = () => { state.selected = b.name; renderSide(); };
+    books.append(li);
+  }
+  const texts = $("#texts");
+  texts.innerHTML = f.texts.length ? "" : `<li class="empty">Nothing converted yet.</li>`;
+  for (const t of f.texts) {
+    const li = document.createElement("li");
+    li.innerHTML = `<button type="button" aria-current="${!!(state.doc && t.name === state.doc.name)}">
+      <span class="fname">${esc(t.name)}</span><span></span><span class="meta">${size(t.size)}, saved ${when(t.mtime)}</span></button>`;
+    li.firstElementChild.onclick = () => openText(t.name);
+    texts.append(li);
+  }
+  const sel = f.books.find(b => b.name === state.selected);
+  $("#opts").hidden = !sel;
+  if (sel) {
+    $("#opts-for").textContent = sel.name;
+    const pdf = sel.name.toLowerCase().endsWith(".pdf");
+    $("#o-ocr").hidden = !pdf || !f.ocr;
+    $("#convert").textContent = sel.output ? "Convert again" : "Convert";
+    $("#convert").disabled = !!state.job;
+  }
+}
+
+// ---------------------------------------------------------------- upload
+function upload(file) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("PUT", "/api/upload?name=" + encodeURIComponent(file.name));
+    xhr.upload.onprogress = e => {
+      if (e.lengthComputable) $("#drop-sub").textContent = `Uploading ${file.name}: ${Math.round(e.loaded / e.total * 100)}%`;
+    };
+    xhr.onload = () => {
+      let data = {};
+      try { data = JSON.parse(xhr.responseText); } catch (_) {}
+      xhr.status < 300 ? resolve(data) : reject(new Error(data.error || "The upload failed."));
+    };
+    xhr.onerror = () => reject(new Error("The upload failed. Is the container still running?"));
+    xhr.send(file);
+  });
+}
+
+async function addFiles(list) {
+  const files = [...list].filter(f => /\.(epub|pdf|txt)$/i.test(f.name));
+  if (!files.length) { toast("Only EPUB, PDF and TXT files can be converted.", true); return; }
+  for (const f of files) {
+    try { const r = await upload(f); state.selected = r.name; }
+    catch (e) { toast(e.message, true); }
+  }
+  $("#drop-sub").textContent = "Drop an EPUB, PDF or TXT here, or choose a file.";
+  await loadFiles();
+}
+
+$("#drop").onclick = () => $("#picker").click();
+$("#picker").onchange = e => { addFiles(e.target.files); e.target.value = ""; };
+let dragDepth = 0;
+addEventListener("dragenter", e => { e.preventDefault(); dragDepth++; document.body.classList.add("dropping"); });
+addEventListener("dragleave", () => { if (--dragDepth <= 0) { dragDepth = 0; document.body.classList.remove("dropping"); } });
+addEventListener("dragover", e => e.preventDefault());
+addEventListener("drop", e => {
+  e.preventDefault(); dragDepth = 0; document.body.classList.remove("dropping");
+  if (e.dataTransfer.files.length) addFiles(e.dataTransfer.files);
+});
+
+// ---------------------------------------------------------------- convert
+$("#convert").onclick = async () => {
+  if (!state.selected || state.job) return;
+  if (!confirmDiscard()) return;
+  const opts = {
+    name: state.selected,
+    sentences: $("#o-sentences").checked,
+    keep_furniture: $("#o-furniture").checked,
+    ocr: (document.querySelector("input[name=ocr]:checked") || {}).value || "auto",
+  };
+  try {
+    const { id } = await api("/api/convert", { method: "POST", body: JSON.stringify(opts) });
+    state.job = { id, book: state.selected, started: Date.now() };
+    state.doc = null;
+    renderSide();
+    showRunning();
+    state.poll = setInterval(pollJob, 700);
+  } catch (e) { toast(e.message, true); }
+};
+
+function showRunning() {
+  $("#main").innerHTML = `<div class="state">
+    <h2>Converting ${esc(state.job.book)}</h2>
+    <p id="elapsed">Starting.</p>
+    <div class="log" id="log" aria-live="polite"></div>
+    <p style="margin-top:12px"><button class="btn" type="button" id="stop" hidden>Stop OCR</button></p></div>`;
+  $("#stop").onclick = () => api(`/api/job/${state.job.id}/stop`, { method: "POST", body: "{}" });
+}
+
+async function pollJob() {
+  let job;
+  try { job = await api("/api/job/" + state.job.id); }
+  catch (e) { clearInterval(state.poll); state.job = null; showError("Lost track of the conversion", e.message); renderSide(); return; }
+  const secs = Math.round((Date.now() - state.job.started) / 1000);
+  const el = $("#elapsed");
+  if (el) el.textContent = `Running for ${secs < 60 ? secs + (secs === 1 ? " second" : " seconds") : Math.floor(secs / 60) + " min " + (secs % 60) + " s"}.`;
+  const log = $("#log");
+  if (log) {
+    log.innerHTML = job.log.map(l => `<div>${esc(l)}</div>`).join("");
+    log.scrollTop = log.scrollHeight;
+  }
+  const stop = $("#stop");
+  if (stop) stop.hidden = !job.log.some(l => l.startsWith("Running OCR"));
+  if (job.state === "running") return;
+  clearInterval(state.poll);
+  state.job = null;
+  if (job.state === "done") {
+    const r = job.result;
+    openDoc({ name: r.name, text: r.text, check: r.check, joins: r.joins, headings: r.headings, summary: r.summary.join(". ") + "." });
+    toast(`Saved ${r.name}`);
+  } else {
+    const hint = /no text layer/i.test(job.error) ? "Set Text layer to “OCR pages with no text” and convert again." : "";
+    showError(`Couldn't convert ${job.book}`, job.error, hint);
+  }
+  loadFiles();
+}
+
+function showError(title, msg, hint = "") {
+  $("#main").innerHTML = `<div class="state err"><h2>${esc(title)}</h2><p>${esc(msg)}</p>${hint ? `<p>${esc(hint)}</p>` : ""}</div>`;
+}
+
+// ---------------------------------------------------------------- document
+// The text is kept as an array of lines. One line is one paragraph (or one
+// sentence with "one sentence per line"); blank lines separate paragraphs and
+// two blank lines mark a chapter break, exactly as tts-audiobook-tool reads it.
+// Firefox before 136 doesn't know plaintext-only; plain "true" works with the paste handler below.
+const EDITABLE = (() => {
+  try { const d = document.createElement("div"); d.contentEditable = "plaintext-only"; return d.contentEditable === "plaintext-only" ? "plaintext-only" : "true"; }
+  catch (_) { return "true"; }
+})();
+const RX = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const sheetEl = () => document.getElementById("sheet");
+const lineEl = i => sheetEl() && sheetEl().querySelector(`[data-i="${i}"]`);
+
+function getText() {
+  return state.view === "plain" && $("#editor") ? $("#editor").value : state.doc.lines.join("\n");
+}
+function setText(t) {
+  state.doc.lines = t.split("\n");
+  if (state.view === "plain" && $("#editor")) $("#editor").value = t;
+}
+
+function confirmDiscard() {
+  return !(state.doc && state.doc.dirty) || confirm(`Discard unsaved changes to ${state.doc.name}?`);
+}
+
+async function openText(name) {
+  if (state.job || !confirmDiscard()) return;
+  try {
+    const r = await api("/api/text?name=" + encodeURIComponent(name));
+    openDoc({ name: r.name, text: r.text, check: r.check, joins: r.joins, headings: [], summary: "" });
+  } catch (e) { toast(e.message, true); }
+}
+
+function openDoc(d) {
+  state.doc = {
+    name: d.name, lines: d.text.replace(/\n$/, "").split("\n"), check: d.check || [], joins: d.joins || [],
+    headings: new Set(d.headings || []), dirty: false, undo: [], redo: [],
+  };
+  state.view = "proof";
+  state.matchAt = -1;
+  const main = $("#main");
+  main.innerHTML = "";
+  main.append($("#doc-tpl").content.cloneNode(true));
+  $("#doc-name").textContent = d.name;
+  $("#doc-summary").textContent = d.summary || `${countParas(d.text)} paragraphs`;
+  for (const b of main.querySelectorAll(".tabs button")) {
+    b.onclick = () => setView(b.dataset.view);
+    b.onmousedown = e => e.preventDefault();       // keep the cursor where it is in the text
+  }
+  for (const id of ["#f-q", "#f-whole", "#f-case"]) $(id).addEventListener("input", () => { state.matchAt = -1; refresh(); });
+  $("#f-q").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); nextMatch(); } });
+  $("#f-r").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); replaceAll(); } });
+  $("#f-next").onclick = nextMatch;
+  $("#f-all").onclick = replaceAll;
+  $("#save").onclick = save;
+  $("#download").onclick = download;
+  renderSide();
+  refresh();
+  updateStatus();
+}
+
+const countParas = t => t.split(/\n\s*\n/).filter(s => s.trim()).length;
+
+// ---------------------------------------------------------------- caret helpers
+function selOffsets(el) {
+  const sel = getSelection();
+  if (!sel.rangeCount || !el.contains(sel.anchorNode)) return { start: 0, end: 0 };
+  const r = sel.getRangeAt(0), pre = document.createRange();
+  pre.selectNodeContents(el);
+  pre.setEnd(r.startContainer, r.startOffset);
+  const start = pre.toString().length;
+  pre.setEnd(r.endContainer, r.endOffset);
+  return { start, end: pre.toString().length };
+}
+
+function setCaret(el, offset, length = 0) {
+  const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+  const r = document.createRange();
+  let n, left = offset, last = null, started = false;
+  while ((n = walker.nextNode())) {
+    last = n;
+    if (!started && left <= n.length) { r.setStart(n, left); started = true; left += length; }
+    if (started && left <= n.length) { r.setEnd(n, left); break; }
+    left -= n.length;
+  }
+  if (!started) { last ? r.setStart(last, last.length) : r.setStart(el, 0); r.collapse(true); }
+  else if (!n && last) r.setEnd(last, last.length);
+  const sel = getSelection();
+  sel.removeAllRanges();
+  sel.addRange(r);
+}
+
+function placeCaret(line, offset = 0) {
+  let el = lineEl(line);
+  for (let k = line; !el && k < state.doc.lines.length; k++) { el = lineEl(k); if (el) offset = 0; }
+  if (!el) return;
+  el.focus({ preventScroll: true });
+  setCaret(el, Math.min(offset, el.textContent.length));
+  const sc = $("#scroller"), b = caretRect() || el.getBoundingClientRect(), s = sc.getBoundingClientRect();
+  if (b.top < s.top + 10 || b.bottom > s.bottom - 40) sc.scrollTop += b.top - s.top - s.height / 3;
+}
+
+function caretRect() {
+  const sel = getSelection();
+  if (!sel.rangeCount) return null;
+  const r = sel.getRangeAt(0).cloneRange();
+  r.collapse(true);
+  const rect = r.getClientRects()[0];
+  return rect && (rect.height || rect.top) ? rect : null;
+}
+
+function offsetAtPoint(el, x, y) {
+  let node, off;
+  if (document.caretPositionFromPoint) {
+    const p = document.caretPositionFromPoint(x, y);
+    if (p) { node = p.offsetNode; off = p.offset; }
+  } else if (document.caretRangeFromPoint) {
+    const p = document.caretRangeFromPoint(x, y);
+    if (p) { node = p.startContainer; off = p.startOffset; }
+  }
+  if (!node || !el.contains(node)) return null;
+  const pre = document.createRange();
+  pre.selectNodeContents(el);
+  pre.setEnd(node, off);
+  return pre.toString().length;
+}
+
+// ---------------------------------------------------------------- undo
+function snapshot() {
+  const el = document.activeElement && document.activeElement.closest && document.activeElement.closest("[data-i]");
+  return { text: getText(), caret: el ? { line: +el.dataset.i, offset: selOffsets(el).start } : null };
+}
+function pushUndo() {
+  const u = state.doc.undo;
+  u.push(snapshot());
+  if (u.length > 300) u.shift();
+  state.doc.redo = [];
+}
+function undo(redo = false) {
+  const from = redo ? state.doc.redo : state.doc.undo, to = redo ? state.doc.undo : state.doc.redo;
+  const s = from.pop();
+  if (!s) { toast(redo ? "Nothing to redo." : "Nothing to undo."); return; }
+  to.push(snapshot());
+  state.typing = false;
+  setText(s.text);
+  markDirty();
+  if (state.view === "proof") renderProof({ caret: s.caret });
+  scheduleCheck();
+  updateCount();
+}
+
+// ---------------------------------------------------------------- proof view
+function wordRegex() {
+  const words = (state.doc.check || []).map(([w]) => RX(w));
+  return words.length ? new RegExp(`(?<![\\p{L}'’])(?:${words.join("|")})(?![\\p{L}])`, "gu") : null;
+}
+
+// Wrap find matches and flagged words in a line, escaping everything else.
+function markLine(line, fre, wre) {
+  const spans = [];
+  for (const [re, cls] of [[fre, "f"], [wre, "w"]]) {
+    if (!re) continue;
+    re.lastIndex = 0;
+    let m;
+    while ((m = re.exec(line))) {
+      if (!m[0]) { re.lastIndex++; continue; }
+      const s = m.index, e = s + m[0].length;
+      if (!spans.some(x => s < x.e && e > x.s)) spans.push({ s, e, cls });
+    }
+  }
+  spans.sort((a, b) => a.s - b.s);
+  let out = "", at = 0;
+  for (const x of spans) {
+    out += esc(line.slice(at, x.s));
+    const word = line.slice(x.s, x.e);
+    out += x.cls === "w" ? `<mark class="w" title="Not in the word list">${esc(word)}</mark>` : `<mark class="f">${esc(word)}</mark>`;
+    at = x.e;
+  }
+  return out + esc(line.slice(at));
+}
+
+const PROOF_HINT = "Click the text to edit it. Enter starts a new paragraph; Backspace at the start of a paragraph joins it to the one before. Ctrl+Z undoes.";
+const HEADING = /^(chapter|part|book|section|volume)\s+\S+|^(preface|introduction|prologue|epilogue|foreword|afterword|appendix|conclusion|contents)\b/i;
+
+function renderProof(opts = {}) {
+  const d = state.doc, lines = d.lines, fre = findRegex(), wre = wordRegex();
+  const parts = [], heads = [];
+  const ed = i => `data-i="${i}" contenteditable="${EDITABLE}" spellcheck="false"`;
+  let group = [], blanks = 0, afterBreak = true;
+  const flush = () => {
+    if (!group.length) return;
+    const one = group.length === 1 ? lines[group[0]] : null;
+    if (one !== null && one.length <= 90 && (d.headings.has(one) || HEADING.test(one) || (afterBreak && one.length <= 70))) {
+      heads.push(group[0]);
+      parts.push(`<h3 ${ed(group[0])}>${markLine(one, fre, wre)}</h3>`);
+    } else {
+      parts.push(`<div class="para">${group.map(i => `<p ${ed(i)}>${markLine(lines[i], fre, wre)}</p>`).join("")}</div>`);
+    }
+    afterBreak = false;
+    group = [];
+  };
+  lines.forEach((line, i) => {
+    if (!line.trim()) { blanks++; flush(); return; }
+    if (blanks >= 2 && parts.length) { parts.push(`<div class="break" role="separator"><span>Chapter break</span></div>`); afterBreak = true; }
+    blanks = 0;
+    group.push(i);
+  });
+  flush();
+  const sc = $("#scroller"), keep = sc.scrollTop;
+  sc.className = "scroller";
+  sc.innerHTML = `<article class="sheet" id="sheet">${parts.join("") || `<p class="empty">This file is empty. Use Plain text to type into it.</p>`}</article>`;
+  sc.scrollTop = keep;
+  bindSheet(sheetEl());
+  renderHeads(heads);
+  $("#hint").textContent = PROOF_HINT;
+  if (opts.anchor) restoreAnchor(opts.anchor);
+  if (opts.caret) placeCaret(opts.caret.line, opts.caret.offset);
+}
+
+// Re-mark lines after a word check, leaving the one being typed in alone.
+function remark() {
+  const sheet = sheetEl();
+  if (!sheet) return;
+  const fre = findRegex(), wre = wordRegex();
+  for (const el of sheet.querySelectorAll("[data-i]")) {
+    if (el === document.activeElement) continue;
+    const html = markLine(state.doc.lines[+el.dataset.i] || "", fre, wre);
+    if (el.innerHTML !== html) el.innerHTML = html;
+  }
+}
+
+const prevText = i => { for (let j = i - 1; j >= 0; j--) if (state.doc.lines[j].trim()) return j; return -1; };
+const nextText = i => { for (let j = i + 1; j < state.doc.lines.length; j++) if (state.doc.lines[j].trim()) return j; return -1; };
+
+function merge(j, i) {
+  const L = state.doc.lines, a = L[j].replace(/\s+$/, ""), b = L[i].replace(/^\s+/, "");
+  const glue = a && b && !/[—–]$/.test(a) ? " " : "";
+  L.splice(j, i - j + 1, a + glue + b);
+  return { line: j, offset: a.length + glue.length };
+}
+
+function changed(opts) {
+  markDirty();
+  renderProof(opts);
+  scheduleCheck();
+  updateCount();
+}
+
+function bindSheet(sheet) {
+  sheet.addEventListener("beforeinput", e => {
+    if (e.inputType === "historyUndo" || e.inputType === "historyRedo") {
+      e.preventDefault();
+      undo(e.inputType === "historyRedo");
+      return;
+    }
+    if (e.inputType === "insertParagraph" || e.inputType === "insertLineBreak") { e.preventDefault(); return; }
+    if (!state.typing) pushUndo();               // one undo step per burst of typing
+    state.typing = true;
+    clearTimeout(state.typingTimer);
+    state.typingTimer = setTimeout(() => state.typing = false, 1200);
+  });
+  sheet.addEventListener("input", e => {
+    const el = e.target.closest("[data-i]");
+    if (!el) return;
+    state.doc.lines[+el.dataset.i] = el.textContent.replace(/\n/g, " ");
+    markDirty();
+    scheduleCheck();
+    scheduleCount();
+  });
+  sheet.addEventListener("paste", e => {
+    if (!e.target.closest("[data-i]")) return;
+    e.preventDefault();
+    const t = (e.clipboardData.getData("text/plain") || "").replace(/\s*\n\s*/g, " ");
+    document.execCommand("insertText", false, t);
+  });
+  sheet.addEventListener("focusout", e => {
+    const el = e.target.closest("[data-i]");
+    if (el) el.innerHTML = markLine(state.doc.lines[+el.dataset.i] || "", findRegex(), wordRegex());
+  });
+  sheet.addEventListener("keydown", e => {
+    const el = e.target.closest("[data-i]");
+    if (!el || e.isComposing) return;
+    const i = +el.dataset.i, line = state.doc.lines[i], { start, end } = selOffsets(el);
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const before = line.slice(0, start).replace(/\s+$/, ""), after = line.slice(end).replace(/^\s+/, "");
+      if (!before || !after) return;              // no empty paragraphs
+      pushUndo();
+      state.doc.lines.splice(i, 1, ...(e.shiftKey ? [before, after] : [before, "", after]));
+      changed({ caret: { line: i + (e.shiftKey ? 1 : 2), offset: 0 } });
+    } else if (e.key === "Backspace" && start === 0 && end === 0) {
+      const j = prevText(i);
+      if (j < 0) return;
+      e.preventDefault();
+      pushUndo();
+      changed({ caret: merge(j, i) });
+    } else if (e.key === "Delete" && start === line.length && end === line.length) {
+      const j = nextText(i);
+      if (j < 0) return;
+      e.preventDefault();
+      pushUndo();
+      changed({ caret: merge(i, j) });
+    } else if ((e.key === "ArrowUp" || e.key === "ArrowDown") && !e.shiftKey) {
+      moveVertical(el, e.key === "ArrowUp" ? -1 : 1, e, start, line.length);
+    } else if (!e.shiftKey && ((e.key === "ArrowLeft" && start === 0 && end === 0) || (e.key === "ArrowRight" && start === line.length && end === line.length))) {
+      const j = e.key === "ArrowLeft" ? prevText(i) : nextText(i);
+      if (j < 0) return;
+      e.preventDefault();
+      placeCaret(j, e.key === "ArrowLeft" ? state.doc.lines[j].length : 0);
+    }
+  });
+}
+
+// Arrow up/down past the first/last line of a paragraph moves into the next one.
+function moveVertical(el, dir, e, offset, len) {
+  const box = el.getBoundingClientRect(), lh = parseFloat(getComputedStyle(el).lineHeight) || 28;
+  const rect = caretRect();
+  const atEdge = rect
+    ? (dir < 0 ? rect.top - box.top < lh * 0.7 : box.bottom - rect.bottom < lh * 0.7)
+    : (dir < 0 ? offset === 0 : offset === len);
+  if (!atEdge) return;
+  const all = [...sheetEl().querySelectorAll("[data-i]")], t = all[all.indexOf(el) + dir];
+  if (!t) return;
+  e.preventDefault();
+  t.focus({ preventScroll: true });
+  t.scrollIntoView({ block: "nearest" });
+  const tb = t.getBoundingClientRect();
+  const x = rect ? rect.left : tb.left + 1, y = dir < 0 ? tb.bottom - lh / 2 : tb.top + lh / 2;
+  const off = offsetAtPoint(t, x, y);
+  setCaret(t, off === null ? (dir < 0 ? t.textContent.length : 0) : off);
+}
+
+// ---------------------------------------------------------------- keeping your place between views
+// An anchor is a line, a character in it, and how far from the top of the view it sits.
+function proofAnchor() {
+  const sc = $("#scroller"), top = sc.getBoundingClientRect().top;
+  const active = document.activeElement && document.activeElement.closest && document.activeElement.closest("#sheet [data-i]");
+  if (active) {
+    const r = caretRect() || active.getBoundingClientRect();
+    return { line: +active.dataset.i, offset: selOffsets(active).start, gap: r.top - top, focus: true };
+  }
+  for (const el of sheetEl().querySelectorAll("[data-i]")) {
+    const b = el.getBoundingClientRect();
+    if (b.bottom > top + 4) {
+      const lh = parseFloat(getComputedStyle(el).lineHeight) || 28;
+      const y = Math.max(b.top, top) + lh / 2;
+      const off = b.top < top ? offsetAtPoint(el, b.left + 1, y) : 0;
+      return { line: +el.dataset.i, offset: off || 0, gap: (off ? y - lh / 2 : b.top) - top, focus: false };
+    }
+  }
+  return { line: 0, offset: 0, gap: 0, focus: false };
+}
+
+function restoreAnchor(a) {
+  const sc = $("#scroller");
+  let el = null, k = a.line;
+  for (; k < state.doc.lines.length && !el; k++) el = lineEl(k);
+  if (!el) return;
+  const top = sc.getBoundingClientRect().top;
+  let y = el.getBoundingClientRect().top;
+  if (a.offset && k - 1 === a.line) {
+    setCaret(el, Math.min(a.offset, el.textContent.length));
+    const r = caretRect();
+    if (r) y = r.top;
+  }
+  sc.scrollTop += y - top - a.gap;
+  if (a.focus) placeCaret(a.line, a.offset);
+  else getSelection().removeAllRanges();
+}
+
+// Pixel position of a character inside the textarea, using a hidden copy with the same layout.
+function textareaTop(ta, pos) {
+  const cs = getComputedStyle(ta), m = document.createElement("div");
+  for (const p of ["fontFamily", "fontSize", "fontWeight", "fontStyle", "lineHeight", "letterSpacing", "wordSpacing", "tabSize", "fontVariationSettings", "fontOpticalSizing"]) m.style[p] = cs[p];
+  Object.assign(m.style, {
+    position: "absolute", visibility: "hidden", top: "0", left: "-9999px", whiteSpace: "pre-wrap", overflowWrap: "break-word",
+    width: (ta.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight)) + "px",
+  });
+  m.textContent = ta.value.slice(0, pos);
+  const mark = document.createElement("span");
+  mark.textContent = "​";
+  m.append(mark);
+  document.body.append(m);
+  const y = mark.offsetTop + parseFloat(cs.paddingTop);
+  m.remove();
+  return y;
+}
+
+function setView(v) {
+  if (v === state.view) return;
+  if (v === "plain") {
+    const a = proofAnchor();
+    state.view = v;
+    for (const b of document.querySelectorAll(".tabs button")) b.setAttribute("aria-pressed", b.dataset.view === v);
+    renderPlain();
+    const ta = $("#editor"), L = state.doc.lines;
+    let pos = 0;
+    for (let k = 0; k < a.line && k < L.length; k++) pos += L[k].length + 1;
+    pos += Math.min(a.offset, (L[a.line] || "").length);
+    ta.setSelectionRange(pos, pos);
+    ta.scrollTop = textareaTop(ta, pos) - (a.gap - (ta.getBoundingClientRect().top - $("#scroller").getBoundingClientRect().top));
+    if (a.focus) ta.focus({ preventScroll: true });
+  } else {
+    const ta = $("#editor"), text = ta.value, focused = document.activeElement === ta;
+    state.doc.lines = text.split("\n");
+    let pos = ta.selectionStart;
+    if (!focused) {
+      // first character showing at the top of the box: search the line starts
+      const starts = [0];
+      for (let k = 0; k < text.length; k++) if (text[k] === "\n") starts.push(k + 1);
+      let lo = 0, hi = starts.length - 1;
+      while (lo < hi) {
+        const mid = (lo + hi + 1) >> 1;
+        if (textareaTop(ta, starts[mid]) <= ta.scrollTop + 8) lo = mid; else hi = mid - 1;
+      }
+      pos = starts[lo];
+    }
+    const line = text.slice(0, pos).split("\n").length - 1;
+    const offset = pos - (text.lastIndexOf("\n", pos - 1) + 1);
+    const gap = textareaTop(ta, pos) - ta.scrollTop + (ta.getBoundingClientRect().top - $("#scroller").getBoundingClientRect().top);
+    state.view = v;
+    for (const b of document.querySelectorAll(".tabs button")) b.setAttribute("aria-pressed", b.dataset.view === v);
+    renderProof({ anchor: { line, offset, gap, focus: focused } });
+    renderWords();
+    updateCount();
+  }
+}
+
+function renderPlain() {
+  const sc = $("#scroller");
+  sc.className = "scroller editing";
+  sc.innerHTML = `<label class="sr" for="editor">Book text</label><textarea class="editor" id="editor" spellcheck="false"></textarea>`;
+  const ta = $("#editor");
+  ta.value = state.doc.lines.join("\n");
+  ta.addEventListener("input", () => { markDirty(); scheduleCheck(); scheduleCount(); });
+  $("#hint").textContent = "The file exactly as saved: one paragraph per line, a blank line between paragraphs, two at a chapter break.";
+  renderHeads(null);
+}
+
+function refresh() {
+  if (!state.doc) return;
+  if (state.view === "proof") renderProof();
+  else {
+    const ta = $("#editor");
+    if (!ta) renderPlain();
+  }
+  renderWords();
+  updateCount();
+}
+
+// ---------------------------------------------------------------- rail
+function renderWords() {
+  const ul = $("#words"), check = state.doc.check || [];
+  if (!state.files || !state.files.dictionary) {
+    $("#words-help").textContent = "Word lists aren't installed here, so there's nothing to check.";
+  }
+  ul.innerHTML = check.length ? "" : `<li class="empty">Nothing flagged.</li>`;
+  for (const [w, n] of check) {
+    const li = document.createElement("li");
+    li.innerHTML = `<button type="button"><span>${esc(w)}</span><span>${n}</span></button>`;
+    li.firstElementChild.onclick = () => pickWord(w);
+    ul.append(li);
+  }
+  const joins = state.doc.joins || [];
+  $("#joins-box").hidden = !joins.length;
+  const jl = $("#joins");
+  jl.innerHTML = "";
+  for (const [from, to, n] of joins) {
+    const li = document.createElement("li");
+    li.innerHTML = `<button type="button" class="j-find" title="Find it in the text">${esc(from)} <span class="to">→ ${esc(to)}${n > 1 ? `, ${n} times` : ""}</span></button>
+      <button type="button" class="btn small" title="Replace every “${esc(from)}” with “${esc(to)}”">Join</button>`;
+    li.children[0].onclick = () => pickWord(from);
+    li.children[1].onclick = () => applyJoin(from, to);
+    jl.append(li);
+  }
+}
+
+function renderHeads(heads) {
+  const ul = $("#heads");
+  if (heads === null) { ul.innerHTML = `<li class="empty">Switch to Proof to see headings.</li>`; return; }
+  ul.innerHTML = heads.length ? "" : `<li class="empty">No headings found.</li>`;
+  for (const i of heads) {
+    const li = document.createElement("li");
+    li.innerHTML = `<button type="button">${esc(state.doc.lines[i])}</button>`;
+    li.firstElementChild.onclick = () => { const el = lineEl(i); if (el) el.scrollIntoView({ block: "start", behavior: "smooth" }); };
+    ul.append(li);
+  }
+}
+
+function applyJoin(from, to) {
+  const re = new RegExp(`(?<![\\p{L}'’])${RX(from)}(?![\\p{L}])`, "gu");
+  let n = 0;
+  const text = getText().replace(re, () => { n++; return to; });
+  if (!n) { toast("Already fixed."); state.doc.joins = state.doc.joins.filter(j => j[0] !== from); renderWords(); return; }
+  pushUndo();
+  setText(text);
+  state.doc.joins = state.doc.joins.filter(j => j[0] !== from);
+  markDirty();
+  if (state.view === "proof") renderProof();
+  renderWords();
+  updateCount();
+  toast(n === 1 ? `Joined “${to}”` : `Joined “${to}” in ${n} places`);
+  scheduleCheck(300);
+}
+
+// ---------------------------------------------------------------- find and replace
+function findRegex(global = true) {
+  const q = $("#f-q") ? $("#f-q").value : "";
+  if (!q) return null;
+  let src = RX(q);
+  if ($("#f-whole").checked) src = `(?<![\\p{L}\\p{N}])${src}(?![\\p{L}\\p{N}])`;
+  return new RegExp(src, (global ? "g" : "") + "u" + ($("#f-case").checked ? "" : "i"));
+}
+
+function pickWord(w) {
+  $("#f-q").value = w;
+  $("#f-whole").checked = true;
+  $("#f-case").checked = false;
+  state.matchAt = -1;
+  refresh();
+  nextMatch();
+  $("#f-r").focus();
+}
+
+let countTimer;
+function scheduleCount() { clearTimeout(countTimer); countTimer = setTimeout(updateCount, 400); }
+function updateCount() {
+  const re = findRegex(), el = $("#f-count");
+  if (!el) return;
+  const n = re ? (getText().match(re) || []).length : 0;
+  el.textContent = re ? (n === 1 ? "1 match" : `${n} matches`) : "";
+}
+
+function nextMatch() {
+  const re = findRegex();
+  if (!re) return;
+  if (state.view === "proof") {
+    const marks = [...document.querySelectorAll("#sheet mark.f")];
+    if (!marks.length) return;
+    marks.forEach(m => m.classList.remove("at"));
+    state.matchAt = (state.matchAt + 1) % marks.length;
+    marks[state.matchAt].classList.add("at");
+    marks[state.matchAt].scrollIntoView({ block: "center" });
+  } else {
+    const ta = $("#editor"), text = ta.value;
+    re.lastIndex = ta.selectionEnd;
+    let m = re.exec(text);
+    if (!m) { re.lastIndex = 0; m = re.exec(text); }
+    if (!m) return;
+    ta.setSelectionRange(m.index, m.index + m[0].length);
+    ta.scrollTop = textareaTop(ta, m.index) - ta.clientHeight / 3;
+  }
+}
+
+function matchCase(found, rep) {
+  if (!rep) return rep;
+  if (found === found.toUpperCase() && found.length > 1 && found !== found.toLowerCase()) return rep.toUpperCase();
+  if (found[0] === found[0].toUpperCase() && found[0] !== found[0].toLowerCase()) return rep[0].toUpperCase() + rep.slice(1);
+  return rep;
+}
+
+function replaceAll() {
+  const re = findRegex();
+  if (!re) return;
+  const rep = $("#f-r").value, keepCase = !$("#f-case").checked;
+  let n = 0;
+  const text = getText().replace(re, m => { n++; return keepCase ? matchCase(m, rep) : rep; });
+  if (!n) { toast("Nothing to replace."); return; }
+  pushUndo();
+  const word = $("#f-q").value.toLowerCase();
+  setText(text);
+  state.doc.check = (state.doc.check || []).filter(([w]) => w.toLowerCase() !== word);
+  state.doc.joins = (state.doc.joins || []).filter(([f]) => f.toLowerCase() !== word);
+  markDirty();
+  if (state.view === "proof") renderProof();
+  renderWords();
+  updateCount();
+  toast(n === 1 ? "Replaced 1 match" : `Replaced ${n} matches`);
+  scheduleCheck(300);
+}
+
+// ---------------------------------------------------------------- word check, save
+let checkTimer;
+function scheduleCheck(delay = 1500) {
+  clearTimeout(checkTimer);
+  checkTimer = setTimeout(async () => {
+    if (!state.doc) return;
+    const doc = state.doc;
+    try {
+      const r = await api("/api/check", { method: "POST", body: JSON.stringify({ text: getText() }) });
+      if (state.doc !== doc) return;
+      doc.check = r.check;
+      doc.joins = r.joins;
+      renderWords();
+      if (state.view === "proof") remark();
+    } catch (_) {}
+  }, delay);
+}
+
+function markDirty() {
+  if (!state.doc.dirty) { state.doc.dirty = true; updateStatus(); }
+}
+
+function updateStatus() {
+  const s = $("#status");
+  if (!s) return;
+  s.className = "status" + (state.doc.dirty ? " unsaved" : "");
+  s.textContent = state.doc.dirty ? "Unsaved changes" : `Saved in ${state.files ? state.files.text_dir : "the text folder"}`;
+}
+
+async function save() {
+  const doc = state.doc;
+  try {
+    const r = await api("/api/save", { method: "POST", body: JSON.stringify({ name: doc.name, text: getText() }) });
+    doc.dirty = false;
+    doc.check = r.check;
+    doc.joins = r.joins;
+    updateStatus();
+    renderWords();
+    if (state.view === "proof") remark();
+    toast(`Saved ${r.name}`);
+    loadFiles();
+  } catch (e) { toast(e.message, true); }
+}
+
+function download() {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([getText() + "\n"], { type: "text/plain;charset=utf-8" }));
+  a.download = state.doc.name;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+addEventListener("keydown", e => {
+  if (!state.doc) return;
+  const mod = e.ctrlKey || e.metaKey, k = e.key.toLowerCase();
+  if (mod && k === "s") { e.preventDefault(); save(); }
+  if (mod && k === "f") { e.preventDefault(); $("#f-q").focus(); $("#f-q").select(); }
+  // Our own undo everywhere except text boxes, which keep their built-in undo.
+  const inBox = e.target.matches && e.target.matches("input, textarea");
+  if (mod && !inBox && (k === "z" || k === "y") && state.view === "proof") {
+    e.preventDefault();
+    undo(k === "y" || e.shiftKey);
+  }
+});
+addEventListener("beforeunload", e => { if (state.doc && state.doc.dirty) { e.preventDefault(); e.returnValue = ""; } });
+
+loadFiles();
+</script>
+</body>
+</html>
