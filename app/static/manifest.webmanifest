@@ -1,0 +1,14 @@
+{
+  "name": "Ebook Prep",
+  "short_name": "Ebook Prep",
+  "description": "Clean book files into narration-ready text.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#EDF0EE",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

@@ -25,6 +25,15 @@ TEXT = Path(os.environ.get("TEXT_DIR", "/data/text"))
 STATIC = Path(__file__).with_name("static")
 PORT = int(os.environ.get("PORT", "7880"))
 BOOK_TYPES = {".epub", ".pdf", ".txt"}
+# Files the page itself loads, besides index.html.
+ASSETS = {
+    "/icon.svg": "image/svg+xml",
+    "/icon-192.png": "image/png",
+    "/icon-512.png": "image/png",
+    "/apple-touch-icon.png": "image/png",
+    "/favicon.ico": "image/png",              # browsers ask for this by default
+    "/manifest.webmanifest": "application/manifest+json",
+}
 JOBS = {}
 JOBS_LOCK = threading.Lock()
 
@@ -179,6 +188,15 @@ class Handler(BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header("Content-Type", "text/html; charset=utf-8")
             self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+        elif url.path in ASSETS:
+            name = "icon-192.png" if url.path == "/favicon.ico" else url.path.lstrip("/")
+            body = (STATIC / name).read_bytes()
+            self.send_response(200)
+            self.send_header("Content-Type", ASSETS[url.path])
+            self.send_header("Content-Length", str(len(body)))
+            self.send_header("Cache-Control", "max-age=86400")
             self.end_headers()
             self.wfile.write(body)
         elif url.path == "/api/files":
