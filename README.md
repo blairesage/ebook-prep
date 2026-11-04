@@ -9,6 +9,9 @@ you generate audio.
 
 ![Proof view with flagged OCR errors and a split word](docs/screenshot.png)
 
+This was a project of mine because I love rare books. I use this to convert rare .pdf's to epub and also to then prep that to a txt file that works cleanly with tts-audiobook-tool as I don't always have time to read the books and enjoy listening to them at work.
+
+
 ## What it fixes
 
 - Lines that break mid-sentence (PDF hard wraps, PDF-to-EPUB conversions where
