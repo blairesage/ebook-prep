@@ -213,8 +213,24 @@ def read_pdf(path):
     return out
 
 
+def decode_text(data):
+    """Bytes of a text file to str: UTF-8, UTF-16 (with or without a BOM), or Windows-1252."""
+    if data.startswith(b"\xef\xbb\xbf"):
+        return data[3:].decode("utf-8", "replace")
+    if data.startswith((b"\xff\xfe", b"\xfe\xff")):
+        return data.decode("utf-16", "replace")
+    head = data[:8000]
+    if head.count(b"\x00") > len(head) // 4:                  # UTF-16 without a BOM
+        le = head[1::2].count(b"\x00") > head[0::2].count(b"\x00")
+        return data.decode("utf-16-le" if le else "utf-16-be", "replace")
+    try:
+        return data.decode("utf-8")
+    except UnicodeDecodeError:
+        return data.decode("cp1252", "replace")             # older Windows and OCR exports
+
+
 def read_txt(path):
-    text = Path(path).read_text(encoding="utf-8", errors="replace")
+    text = decode_text(Path(path).read_bytes())
     # Two or more blank lines = possible section break (Calibre's chapter convention).
     return re.sub(r"\n[ \t]*\n[ \t]*\n(?:[ \t]*\n)*", f"\n{SECTION}\n", text)
 
@@ -351,7 +367,7 @@ def is_label(line, max_len):
     return not last or last[-1].lower() not in SMALL_WORDS | {"his", "her", "its", "their", "my", "our", "your"}
 
 
-def classify_headings(units, mode, typical):
+def classify_headings(units, mode, typical, blanks_meaningful=False):
     # A heading-looking line only counts as a heading if it sits between sentences.
     # If the sentence before it is unfinished, or the next line carries on in
     # lowercase, it's body text and stays in the paragraph.
@@ -362,7 +378,11 @@ def classify_headings(units, mode, typical):
     for i, (k, t) in enumerate(units):
         if k == "text":
             between = (prev is None or TERMINAL_ANY.search(prev)) and not starts_lowercase(nxt[i])
-            if between and (is_heading_like(t) or is_label(t, max_label)):
+            # In text with blank lines between paragraphs (Project Gutenberg style), a short
+            # unpunctuated line standing alone is a title or heading.
+            alone = blanks_meaningful and (i == 0 or units[i - 1][0] != "text") and (
+                i + 1 == len(units) or units[i + 1][0] != "text")
+            if between and (is_heading_like(t) or is_label(t, 80 if alone else max_label)):
                 out.append(("heading", t))
                 prev = None
                 continue
@@ -688,8 +708,8 @@ def process(src, sentences=False, keep_furniture=False):
     if not keep_furniture:
         units = strip_furniture(units, stats)
     typical = typical_length(units)
-    units = classify_headings(units, mode, typical)
     blanks_meaningful = blanks_are_paragraph_breaks(units)
+    units = classify_headings(units, mode, typical, blanks_meaningful)
     vocab = build_vocab(units)
     blocks = build_blocks(units, mode, typical, blanks_meaningful, stats, vocab)
     text = render(blocks, sentences)
