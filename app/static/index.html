@@ -83,6 +83,8 @@ legend { font-weight: 600; padding: 0; margin-bottom: 2px; }
 .btn.primary:hover { filter: brightness(1.07); }
 .btn:disabled { opacity: .5; cursor: default; }
 .opts .btn.primary { width: 100%; margin-top: 12px; padding: 9px; }
+.opts .del { width: 100%; margin-top: 8px; }
+.btn.danger:hover { border-color: var(--bad); color: var(--bad); }
 
 /* ---------- main */
 main { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; min-width: 0; height: 100vh; }
@@ -222,6 +224,7 @@ textarea.editor {
         <span>Use the existing text only</span></label>
     </fieldset>
     <button class="btn primary" id="convert" type="button">Convert</button>
+    <button class="btn danger del" id="delete-book" type="button">Delete this book</button>
   </div>
 
   <div class="group">
@@ -287,6 +290,7 @@ textarea.editor {
   </div>
   <footer class="bar">
     <span class="status" id="status"></span>
+    <button class="btn danger" type="button" id="delete-text">Delete</button>
     <button class="btn" type="button" id="download">Download</button>
     <button class="btn primary" type="button" id="save">Save</button>
   </footer>
@@ -355,8 +359,23 @@ function renderSide() {
     $("#o-ocr").hidden = !pdf || !f.ocr;
     $("#convert").textContent = sel.output ? "Convert again" : "Convert";
     $("#convert").disabled = !!state.job;
+    $("#delete-book").disabled = !!(state.job && state.job.book === sel.name);
   }
 }
+
+$("#delete-book").onclick = async () => {
+  const name = state.selected;
+  const b = state.files && state.files.books.find(x => x.name === name);
+  if (!b) return;
+  const kept = b.output ? ` Its converted text, ${b.output}, is kept.` : "";
+  if (!confirm(`Delete ${name} from your books folder?${kept}`)) return;
+  try {
+    await api("/api/book?name=" + encodeURIComponent(name), { method: "DELETE" });
+    state.selected = null;
+    toast(`Deleted ${name}`);
+    loadFiles();
+  } catch (e) { toast(e.message, true); }
+};
 
 // ---------------------------------------------------------------- upload
 function upload(file) {
@@ -480,6 +499,21 @@ function setText(t) {
   if (state.view === "plain" && $("#editor")) $("#editor").value = t;
 }
 
+const EMPTY_MAIN = $("#main").innerHTML;
+
+async function deleteText() {
+  const name = state.doc.name;
+  const unsaved = state.doc.dirty ? " Your unsaved changes go with it." : "";
+  if (!confirm(`Delete ${name} from your text folder?${unsaved} This can't be undone.`)) return;
+  try {
+    await api("/api/text?name=" + encodeURIComponent(name), { method: "DELETE" });
+    state.doc = null;
+    $("#main").innerHTML = EMPTY_MAIN;
+    toast(`Deleted ${name}`);
+    loadFiles();
+  } catch (e) { toast(e.message, true); }
+}
+
 function confirmDiscard() {
   return !(state.doc && state.doc.dirty) || confirm(`Discard unsaved changes to ${state.doc.name}?`);
 }
@@ -514,6 +548,7 @@ function openDoc(d) {
   $("#f-next").onclick = nextMatch;
   $("#f-all").onclick = replaceAll;
   $("#save").onclick = save;
+  $("#delete-text").onclick = deleteText;
   $("#download").onclick = download;
   renderSide();
   refresh();
