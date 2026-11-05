@@ -276,6 +276,22 @@ class Handler(BaseHTTPRequestHandler):
         else:
             self.fail("Not found.", 404)
 
+    def do_DELETE(self):
+        url = urlparse(self.path)
+        name = parse_qs(url.query).get("name", [""])[0]
+        if url.path == "/api/book":
+            path = safe_name(name, BOOKS, BOOK_TYPES)
+            if path and any(j["state"] == "running" and j["book"] == path.name for j in JOBS.values()):
+                return self.fail("That book is being converted. Wait for it to finish.", 409)
+        elif url.path == "/api/text":
+            path = safe_name(name, TEXT, {".txt"})
+        else:
+            return self.fail("Not found.", 404)
+        if not path or not path.exists():
+            return self.fail("File not found.", 404)
+        path.unlink()
+        self.send_json({"ok": True})
+
 
 def main():
     BOOKS.mkdir(parents=True, exist_ok=True)
